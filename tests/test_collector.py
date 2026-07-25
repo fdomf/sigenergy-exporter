@@ -4,7 +4,7 @@ import threading
 import unittest
 from unittest.mock import patch
 
-from prometheus_client import CollectorRegistry
+from prometheus_client import REGISTRY, CollectorRegistry
 from prometheus_client.exposition import generate_latest
 from prometheus_client.parser import text_string_to_metric_families
 
@@ -219,12 +219,40 @@ class CollectionTests(unittest.TestCase):
         self.assertNotIn("NaN", output)
 
     def test_connect_failure_closes_client_and_emits_only_scrape_metrics(self) -> None:
+        attempts_before = (
+            REGISTRY.get_sample_value(
+                "sigenergy_modbus_connections_total",
+                {"module": "test_module"},
+            )
+            or 0
+        )
+        errors_before = (
+            REGISTRY.get_sample_value(
+                "sigenergy_modbus_connection_errors_total",
+                {"module": "test_module"},
+            )
+            or 0
+        )
         factory = ClientFactory(connect=False)
         with patch("sigenergy_exporter.collector.LOG.warning"):
             output = self.render(factory)
         self.assertIn("sigenergy_up 0.0", output)
         self.assertNotIn("sigenergy_test_phase_watts", output)
         self.assertTrue(factory.clients[0].closed)
+        self.assertEqual(
+            REGISTRY.get_sample_value(
+                "sigenergy_modbus_connections_total",
+                {"module": "test_module"},
+            ),
+            attempts_before + 1,
+        )
+        self.assertEqual(
+            REGISTRY.get_sample_value(
+                "sigenergy_modbus_connection_errors_total",
+                {"module": "test_module"},
+            ),
+            errors_before + 1,
+        )
 
     def test_output_is_valid_prometheus_exposition(self) -> None:
         output = self.render(ClientFactory())
@@ -252,6 +280,13 @@ class CollectionTests(unittest.TestCase):
         self.assertEqual(self.clock.sleeps, [1.0, 1.0, 1.0])
 
     def test_deadline_shorter_than_modbus_timeout_skips_connection(self) -> None:
+        deadline_before = (
+            REGISTRY.get_sample_value(
+                "sigenergy_scrape_deadline_exceeded_total",
+                {"module": "test_module", "stage": "connect"},
+            )
+            or 0
+        )
         factory = ClientFactory()
         result = collect_target(
             self.target,
@@ -264,8 +299,22 @@ class CollectionTests(unittest.TestCase):
         )
         self.assertFalse(result.required_success)
         self.assertEqual(factory.clients, [])
+        self.assertEqual(
+            REGISTRY.get_sample_value(
+                "sigenergy_scrape_deadline_exceeded_total",
+                {"module": "test_module", "stage": "connect"},
+            ),
+            deadline_before + 1,
+        )
 
     def test_deadline_omits_optional_block_that_cannot_fit(self) -> None:
+        deadline_before = (
+            REGISTRY.get_sample_value(
+                "sigenergy_scrape_deadline_exceeded_total",
+                {"module": "test_module", "stage": "pacing"},
+            )
+            or 0
+        )
         factory = ClientFactory()
         result = collect_target(
             self.target,
@@ -279,6 +328,13 @@ class CollectionTests(unittest.TestCase):
         self.assertTrue(result.required_success)
         self.assertEqual(result.block_success, {"required": True, "optional": False})
         self.assertEqual(factory.clients[0].calls, [(30000, 4, 247)])
+        self.assertEqual(
+            REGISTRY.get_sample_value(
+                "sigenergy_scrape_deadline_exceeded_total",
+                {"module": "test_module", "stage": "pacing"},
+            ),
+            deadline_before + 1,
+        )
 
     def test_repository_module_normalizes_representative_v25_values(self) -> None:
         module = load_exporter_config(REPOSITORY_CONFIG).modules["sigenstor_plant_v2_5"]

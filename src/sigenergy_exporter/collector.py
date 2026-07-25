@@ -20,7 +20,13 @@ from sigenergy_exporter.config import (
     RegisterBlock,
     RegisterType,
 )
-from sigenergy_exporter.metrics import MODBUS_REQUEST_ERRORS, MODBUS_REQUESTS
+from sigenergy_exporter.metrics import (
+    MODBUS_CONNECTION_ERRORS,
+    MODBUS_CONNECTIONS,
+    MODBUS_REQUEST_ERRORS,
+    MODBUS_REQUESTS,
+    SCRAPE_DEADLINE_EXCEEDED,
+)
 
 LOG = logging.getLogger("sigenergy_exporter")
 DEFAULT_MODBUS_PORT = 502
@@ -28,6 +34,10 @@ DEFAULT_MODBUS_PORT = 502
 
 class ScrapeTimeoutError(TimeoutError):
     """The Prometheus scrape deadline cannot accommodate more Modbus work."""
+
+    def __init__(self, message: str, stage: str) -> None:
+        super().__init__(message)
+        self.stage = stage
 
 
 @dataclass(frozen=True)
@@ -184,7 +194,10 @@ class TargetCoordinator:
             with self._lock:
                 state.users -= 1
                 state.last_used_at = self._monotonic()
-            raise ScrapeTimeoutError("scrape deadline reached waiting for target")
+            raise ScrapeTimeoutError(
+                "scrape deadline reached waiting for target",
+                "queue",
+            )
         try:
             yield state
         finally:
@@ -212,13 +225,17 @@ class TargetCoordinator:
             and wait_seconds + minimum_time_remaining > deadline - now
         ):
             raise ScrapeTimeoutError(
-                "scrape deadline cannot accommodate request pacing and timeout"
+                "scrape deadline cannot accommodate request pacing and timeout",
+                "pacing",
             )
         if wait_seconds > 0:
             self._sleep(wait_seconds)
         request_at = self._monotonic()
         if deadline is not None and request_at >= deadline:
-            raise ScrapeTimeoutError("scrape deadline reached before Modbus request")
+            raise ScrapeTimeoutError(
+                "scrape deadline reached before Modbus request",
+                "pacing",
+            )
         state.last_request_at = request_at
         state.retain_until = request_at + request_gap_seconds
         return request_at
@@ -309,15 +326,21 @@ def collect_target(
                     and deadline - monotonic() < module.timeout_seconds
                 ):
                     raise ScrapeTimeoutError(
-                        "scrape deadline cannot accommodate connection timeout"
+                        "scrape deadline cannot accommodate connection timeout",
+                        "connect",
                     )
-                client = client_factory(
-                    host=target.host,
-                    port=target.port,
-                    timeout=module.timeout_seconds,
-                )
-                if not client.connect():
-                    raise ConnectionError(f"Could not connect to {target.display}")
+                MODBUS_CONNECTIONS.labels(module=module_name).inc()
+                try:
+                    client = client_factory(
+                        host=target.host,
+                        port=target.port,
+                        timeout=module.timeout_seconds,
+                    )
+                    if not client.connect():
+                        raise ConnectionError(f"Could not connect to {target.display}")
+                except Exception:
+                    MODBUS_CONNECTION_ERRORS.labels(module=module_name).inc()
+                    raise
                 for block in module.blocks:
                     try:
                         block_data[block.name] = read_input_block(
@@ -330,7 +353,11 @@ def collect_target(
                             deadline,
                         )
                         block_success[block.name] = True
-                    except ScrapeTimeoutError:
+                    except ScrapeTimeoutError as exc:
+                        SCRAPE_DEADLINE_EXCEEDED.labels(
+                            module=module_name,
+                            stage=exc.stage,
+                        ).inc()
                         LOG.info(
                             "Scrape deadline reached before block %s for target %s "
                             "module %s",
@@ -347,7 +374,11 @@ def collect_target(
                             module_name,
                             exc_info=True,
                         )
-            except ScrapeTimeoutError:
+            except ScrapeTimeoutError as exc:
+                SCRAPE_DEADLINE_EXCEEDED.labels(
+                    module=module_name,
+                    stage=exc.stage,
+                ).inc()
                 LOG.info(
                     "Scrape deadline reached for target %s module %s",
                     target.display,
@@ -370,7 +401,11 @@ def collect_target(
                             target.display,
                             exc_info=True,
                         )
-    except ScrapeTimeoutError:
+    except ScrapeTimeoutError as exc:
+        SCRAPE_DEADLINE_EXCEEDED.labels(
+            module=module_name,
+            stage=exc.stage,
+        ).inc()
         LOG.info(
             "Scrape deadline reached waiting for target %s module %s",
             target.display,

@@ -38,6 +38,21 @@ MODBUS_REQUEST_ERRORS = Counter(
     "Failed Modbus register-block requests made by the Sigenergy exporter.",
     ["module", "block"],
 )
+MODBUS_CONNECTIONS = Counter(
+    "sigenergy_modbus_connections_total",
+    "Modbus TCP connection attempts made by the Sigenergy exporter.",
+    ["module"],
+)
+MODBUS_CONNECTION_ERRORS = Counter(
+    "sigenergy_modbus_connection_errors_total",
+    "Failed Modbus TCP connection attempts made by the Sigenergy exporter.",
+    ["module"],
+)
+SCRAPE_DEADLINE_EXCEEDED = Counter(
+    "sigenergy_scrape_deadline_exceeded_total",
+    "Sigenergy collections stopped because the scrape deadline was exceeded.",
+    ["module", "stage"],
+)
 COLLECTIONS_IN_FLIGHT = Gauge(
     "sigenergy_collections_in_flight",
     "Sigenergy target collections currently in flight.",
