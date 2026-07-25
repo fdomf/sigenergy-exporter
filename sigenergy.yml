@@ -1,0 +1,343 @@
+version: 1
+default_module: sigenstor_plant_v2_5
+
+modules:
+  sigenstor_plant_v2_5:
+    unit_id: 247
+    timeout_seconds: 3
+    request_gap_seconds: 1.0
+
+    blocks:
+      - name: plant
+        address: 30003
+        count: 70
+        required: true
+      - name: ess_details
+        address: 30083
+        count: 5
+        required: false
+
+    metrics:
+      - name: sigenergy_ems_mode
+        help: EMS operating mode as a one-hot state set from Sigenergy register 30003.
+        block: plant
+        offset: 0
+        register_type: u16
+        multiplier: 1
+        labels: {}
+        states:
+          label: mode
+          values:
+            0: max_self_consumption
+            1: ai_mode
+            2: time_of_use
+            7: remote_ems
+
+      - name: sigenergy_grid_sensor_connected
+        help: Whether the grid sensor or gateway is connected, from Sigenergy register 30004.
+        block: plant
+        offset: 1
+        register_type: u16
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_grid_active_power_watts
+        help: Grid active power in watts from Sigenergy register 30005; positive is import and negative is export.
+        block: plant
+        offset: 2
+        register_type: s32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_grid_reactive_power_vars
+        help: Grid reactive power in vars from Sigenergy register 30007.
+        block: plant
+        offset: 4
+        register_type: s32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_grid_mode
+        help: Grid connection mode as a one-hot state set from Sigenergy register 30009.
+        block: plant
+        offset: 6
+        register_type: u16
+        multiplier: 1
+        labels: {}
+        states:
+          label: mode
+          values:
+            0: on_grid
+            1: off_grid_auto
+            2: off_grid_manual
+
+      - name: sigenergy_plant_max_active_power_watts
+        help: Maximum plant active power in watts from Sigenergy register 30010.
+        block: plant
+        offset: 7
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_plant_max_apparent_power_volt_amperes
+        help: Maximum plant apparent power in volt-amperes from Sigenergy register 30012.
+        block: plant
+        offset: 9
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_battery_state_of_charge_ratio
+        help: Battery state of charge as a ratio from 0 to 1, from Sigenergy register 30014.
+        block: plant
+        offset: 11
+        register_type: u16
+        multiplier: 0.001
+        labels: {}
+
+      - name: sigenergy_plant_phase_active_power_watts
+        help: Plant active power by phase in watts from Sigenergy registers 30015, 30017, and 30019.
+        block: plant
+        offset: 12
+        register_type: s32
+        multiplier: 1
+        labels: {phase: a}
+      - name: sigenergy_plant_phase_active_power_watts
+        help: Plant active power by phase in watts from Sigenergy registers 30015, 30017, and 30019.
+        block: plant
+        offset: 14
+        register_type: s32
+        multiplier: 1
+        labels: {phase: b}
+      - name: sigenergy_plant_phase_active_power_watts
+        help: Plant active power by phase in watts from Sigenergy registers 30015, 30017, and 30019.
+        block: plant
+        offset: 16
+        register_type: s32
+        multiplier: 1
+        labels: {phase: c}
+
+      - name: sigenergy_plant_phase_reactive_power_vars
+        help: Plant reactive power by phase in vars from Sigenergy registers 30021, 30023, and 30025.
+        block: plant
+        offset: 18
+        register_type: s32
+        multiplier: 1
+        labels: {phase: a}
+      - name: sigenergy_plant_phase_reactive_power_vars
+        help: Plant reactive power by phase in vars from Sigenergy registers 30021, 30023, and 30025.
+        block: plant
+        offset: 20
+        register_type: s32
+        multiplier: 1
+        labels: {phase: b}
+      - name: sigenergy_plant_phase_reactive_power_vars
+        help: Plant reactive power by phase in vars from Sigenergy registers 30021, 30023, and 30025.
+        block: plant
+        offset: 22
+        register_type: s32
+        multiplier: 1
+        labels: {phase: c}
+
+      - name: sigenergy_plant_active_power_watts
+        help: Total plant active power in watts from Sigenergy register 30031.
+        block: plant
+        offset: 28
+        register_type: s32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_plant_reactive_power_vars
+        help: Total plant reactive power in vars from Sigenergy register 30033.
+        block: plant
+        offset: 30
+        register_type: s32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_pv_power_watts
+        help: Photovoltaic power in watts from Sigenergy register 30035.
+        block: plant
+        offset: 32
+        register_type: s32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_battery_power_watts
+        help: Battery power in watts from Sigenergy register 30037; positive is charging and negative is discharging.
+        block: plant
+        offset: 34
+        register_type: s32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_plant_available_max_active_power_watts
+        help: Available maximum active power fed to the AC terminal in watts, from Sigenergy register 30039.
+        block: plant
+        offset: 36
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_plant_available_min_active_power_watts
+        help: Available minimum active power absorbed from the AC terminal in watts, from Sigenergy register 30041.
+        block: plant
+        offset: 38
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_plant_available_max_reactive_power_vars
+        help: Available maximum reactive power fed to the AC terminal in vars, from Sigenergy register 30043.
+        block: plant
+        offset: 40
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_plant_available_min_reactive_power_vars
+        help: Available minimum reactive power absorbed from the AC terminal in vars, from Sigenergy register 30045.
+        block: plant
+        offset: 42
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_battery_available_max_charge_power_watts
+        help: Available maximum battery charging power in watts from Sigenergy register 30047.
+        block: plant
+        offset: 44
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_battery_available_max_discharge_power_watts
+        help: Available maximum battery discharging power in watts from Sigenergy register 30049.
+        block: plant
+        offset: 46
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_plant_state
+        help: Plant operating state as a one-hot state set from Sigenergy register 30051.
+        block: plant
+        offset: 48
+        register_type: u16
+        multiplier: 1
+        labels: {}
+        states:
+          label: state
+          values:
+            0: standby
+            1: running
+            2: fault
+            3: shutdown
+
+      - name: sigenergy_grid_phase_active_power_watts
+        help: Grid active power by phase in watts from Sigenergy registers 30052, 30054, and 30056; positive is import and negative is export.
+        block: plant
+        offset: 49
+        register_type: s32
+        multiplier: 1
+        labels: {phase: a}
+      - name: sigenergy_grid_phase_active_power_watts
+        help: Grid active power by phase in watts from Sigenergy registers 30052, 30054, and 30056; positive is import and negative is export.
+        block: plant
+        offset: 51
+        register_type: s32
+        multiplier: 1
+        labels: {phase: b}
+      - name: sigenergy_grid_phase_active_power_watts
+        help: Grid active power by phase in watts from Sigenergy registers 30052, 30054, and 30056; positive is import and negative is export.
+        block: plant
+        offset: 53
+        register_type: s32
+        multiplier: 1
+        labels: {phase: c}
+
+      - name: sigenergy_grid_phase_reactive_power_vars
+        help: Grid reactive power by phase in vars from Sigenergy registers 30058, 30060, and 30062.
+        block: plant
+        offset: 55
+        register_type: s32
+        multiplier: 1
+        labels: {phase: a}
+      - name: sigenergy_grid_phase_reactive_power_vars
+        help: Grid reactive power by phase in vars from Sigenergy registers 30058, 30060, and 30062.
+        block: plant
+        offset: 57
+        register_type: s32
+        multiplier: 1
+        labels: {phase: b}
+      - name: sigenergy_grid_phase_reactive_power_vars
+        help: Grid reactive power by phase in vars from Sigenergy registers 30058, 30060, and 30062.
+        block: plant
+        offset: 59
+        register_type: s32
+        multiplier: 1
+        labels: {phase: c}
+
+      - name: sigenergy_battery_available_charge_energy_joules
+        help: Available maximum battery charging energy in joules from Sigenergy register 30064.
+        block: plant
+        offset: 61
+        register_type: u32
+        multiplier: 36000
+        labels: {}
+
+      - name: sigenergy_battery_available_discharge_energy_joules
+        help: Available maximum battery discharging energy in joules from Sigenergy register 30066.
+        block: plant
+        offset: 63
+        register_type: u32
+        multiplier: 36000
+        labels: {}
+
+      - name: sigenergy_battery_rated_charge_power_watts
+        help: Rated battery charging power in watts from Sigenergy register 30068.
+        block: plant
+        offset: 65
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_battery_rated_discharge_power_watts
+        help: Rated battery discharging power in watts from Sigenergy register 30070.
+        block: plant
+        offset: 67
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_battery_rated_energy_joules
+        help: Rated battery energy capacity in joules from Sigenergy register 30083.
+        block: ess_details
+        offset: 0
+        register_type: u32
+        multiplier: 36000
+        labels: {}
+
+      - name: sigenergy_battery_charge_cutoff_state_of_charge_ratio
+        help: Battery charge cutoff state of charge as a ratio from 0 to 1, from Sigenergy register 30085.
+        block: ess_details
+        offset: 2
+        register_type: u16
+        multiplier: 0.001
+        labels: {}
+
+      - name: sigenergy_battery_discharge_cutoff_state_of_charge_ratio
+        help: Battery discharge cutoff state of charge as a ratio from 0 to 1, from Sigenergy register 30086.
+        block: ess_details
+        offset: 3
+        register_type: u16
+        multiplier: 0.001
+        labels: {}
+
+      - name: sigenergy_battery_state_of_health_ratio
+        help: Capacity-weighted battery state of health as a ratio from 0 to 1, from Sigenergy register 30087.
+        block: ess_details
+        offset: 4
+        register_type: u16
+        multiplier: 0.001
+        labels: {}

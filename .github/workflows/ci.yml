@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: python -m pip install --constraint constraints.txt ".[dev]"
+      - run: ruff check src tests
+      - run: ruff format --check src tests
+      - run: python -m unittest discover -v tests
+      - run: sigenergy-exporter --config.file=sigenergy.yml --dry-run
+      - run: python -m tests.render_metrics > metrics.txt
+      - run: docker run --rm -i --entrypoint /bin/promtool prom/prometheus:v3.5.0 check metrics < metrics.txt
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker build --target test -t sigenergy-exporter:test .
+      - run: docker run --rm sigenergy-exporter:test
+      - run: docker build --target runtime -t sigenergy-exporter:ci .
+      - name: Validate bundled module in the runtime image
+        run: >-
+          docker run --rm sigenergy-exporter:ci
+          --config.file=/etc/sigenergy-exporter/sigenergy.yml --dry-run
+      - name: Smoke test the runtime image
+        run: |
+          set -euo pipefail
+          docker run --detach --rm --name sigenergy-exporter-smoke \
+            --publish 10047:10047 sigenergy-exporter:ci
+          trap 'docker stop sigenergy-exporter-smoke >/dev/null 2>&1 || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent --show-error \
+              http://127.0.0.1:10047/-/healthy >/dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 20 ]; then
+              docker logs sigenergy-exporter-smoke
+              exit 1
+            fi
+            sleep 0.5
+          done
+          curl --fail --silent --show-error http://127.0.0.1:10047/metrics \
+            | grep --quiet '^sigenergy_exporter_build_info'

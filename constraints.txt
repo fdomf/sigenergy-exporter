@@ -1,0 +1,4 @@
+prometheus-client==0.22.1
+pymodbus==3.13.0
+PyYAML==6.0.2
+
