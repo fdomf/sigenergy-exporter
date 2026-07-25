@@ -21,7 +21,7 @@ python -m venv .venv
 Run the published non-root container:
 
 ```console
-docker run --rm -p 10047:10047 ghcr.io/fdomf/sigenergy-exporter:latest
+docker run --rm -p 10047:10047 ghcr.io/fdomf/sigenergy-exporter:0.1.1
 ```
 
 Or build it locally:
@@ -37,7 +37,7 @@ repository:
 ```yaml
 services:
   sigenergy-exporter:
-    image: ghcr.io/fdomf/sigenergy-exporter:latest
+    image: ghcr.io/fdomf/sigenergy-exporter:0.1.1
     restart: unless-stopped
     ports:
       - "10047:10047"
@@ -114,6 +114,11 @@ Target metrics use Prometheus base-unit conventions:
 - operating modes and plant state are one-hot gauge families with a bounded
   `mode` or `state` label, including an `unknown` value for undocumented codes.
 
+Exporter instrumentation on `/metrics` includes Modbus connection attempts and
+failures, register-block requests and failures, collection concurrency, and
+scrape deadline exhaustion. Deadline stages use the bounded values `queue`,
+`connect`, and `pacing`; target addresses are never used as metric labels.
+
 ## Configuration
 
 `sigenergy.yml` contains reusable protocol modules, not targets. Each module
@@ -149,6 +154,18 @@ concurrently.
 The collection endpoint can connect to a host supplied in the query string.
 Run it only on a trusted network and avoid publishing port `10047` to the
 public internet.
+
+## Compatibility
+
+The bundled profile implements Sigenergy Modbus Protocol V2.5 dated
+2025-02-19:
+
+| Profile | Modbus function | Unit ID | Register ranges | Automated validation |
+| --- | --- | ---: | --- | --- |
+| `sigenstor_plant_v2_5` | FC04 input registers | 247 | `30003-30072`, `30083-30087` | Decoding, scaling, pacing, failures, exposition |
+
+No specific SigenStor model and firmware combination is claimed as publicly
+validated yet.
 
 ## Development
 
