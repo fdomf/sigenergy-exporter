@@ -28,5 +28,4 @@ LABEL org.opencontainers.image.title="sigenergy-exporter" \
 USER 65534:65534
 EXPOSE 10047
 
-ENTRYPOINT ["sigenergy-exporter"]
-CMD ["--config.file=/etc/sigenergy-exporter/sigenergy.yml"]
+ENTRYPOINT ["sigenergy-exporter", "--config.file=/etc/sigenergy-exporter/sigenergy.yml"]
