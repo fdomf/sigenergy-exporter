@@ -137,7 +137,7 @@ class ExporterApplication:
 <head><meta charset="utf-8"><title>Sigenergy Exporter</title></head>
 <body>
 <h1>Sigenergy Exporter</h1>
-<p>Read-only Prometheus exporter for Sigenergy Modbus TCP targets.</p>
+<p>Prometheus exporter for Sigenergy Modbus TCP targets.</p>
 <form action="/sigenergy" method="get">
 <label>Target <input name="target" placeholder="192.0.2.10"></label>
 <label>Module <input name="module" value="{default_module}"></label>
