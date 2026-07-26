@@ -20,6 +20,7 @@ class RepositoryConfigTests(unittest.TestCase):
         self.assertEqual(config.default_module, "sigenstor_plant_v2_5")
         module = config.modules["sigenstor_plant_v2_5"]
         self.assertEqual(module.unit_id, 247)
+        self.assertEqual(module.function_code, 4)
         self.assertEqual(
             [
                 (block.name, block.address, block.count, block.required)
@@ -47,8 +48,57 @@ class RepositoryConfigTests(unittest.TestCase):
         self.assertEqual(metrics["sigenergy_grid_mode"].states.label, "mode")
         self.assertEqual(metrics["sigenergy_plant_state"].states.label, "state")
 
+    def test_repository_config_has_v25_inverter_module(self) -> None:
+        config = load_exporter_config(REPOSITORY_CONFIG)
+        module = config.modules["sigenstor_inverter_v2_5"]
+        self.assertEqual(module.unit_id, 1)
+        self.assertEqual(module.function_code, 3)
+        self.assertEqual(
+            [
+                (block.name, block.address, block.count, block.required)
+                for block in module.blocks
+            ],
+            [
+                ("inverter", 30540, 84, True),
+                ("electrical", 31000, 42, True),
+            ],
+        )
+        names = {metric.name for metric in module.metrics}
+        self.assertIn("sigenergy_inverter_active_power_watts", names)
+        self.assertIn("sigenergy_inverter_pv_string_voltage_volts", names)
+        self.assertIn("sigenergy_inverter_battery_state_of_charge_ratio", names)
+        self.assertFalse(any("alarm" in name for name in names))
+        self.assertFalse(any("30282" in metric.help for metric in module.metrics))
+        metrics = {metric.name: metric for metric in module.metrics}
+        self.assertEqual(metrics["sigenergy_inverter_state"].states.label, "state")
+        self.assertEqual(
+            metrics["sigenergy_inverter_output_type"].states.values,
+            (
+                (0, "line_neutral"),
+                (1, "three_phase_three_wire"),
+                (2, "three_phase_four_wire"),
+                (3, "split_phase"),
+            ),
+        )
+
 
 class ValidationTests(unittest.TestCase):
+    def test_function_code_defaults_to_fc04(self) -> None:
+        config = parse_config_document(copied_document())
+        self.assertEqual(config.modules["test_module"].function_code, 4)
+
+    def test_accepts_fc03(self) -> None:
+        document = copied_document()
+        document["modules"]["test_module"]["function_code"] = 3
+        config = parse_config_document(document)
+        self.assertEqual(config.modules["test_module"].function_code, 3)
+
+    def test_rejects_unsupported_function_code(self) -> None:
+        document = copied_document()
+        document["modules"]["test_module"]["function_code"] = 6
+        with self.assertRaisesRegex(ValueError, "must be 3 or 4"):
+            parse_config_document(document)
+
     def test_default_module_must_exist(self) -> None:
         document = copied_document()
         document["default_module"] = "missing"

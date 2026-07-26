@@ -250,6 +250,10 @@ class ModbusClient(Protocol):
         self, address: int, *, count: int, device_id: int
     ) -> object: ...
 
+    def read_holding_registers(
+        self, address: int, *, count: int, device_id: int
+    ) -> object: ...
+
 
 @dataclass(frozen=True)
 class CollectionResult:
@@ -259,7 +263,7 @@ class CollectionResult:
     block_data: Mapping[str, Sequence[int]]
 
 
-def read_input_block(
+def read_register_block(
     client: ModbusClient,
     block: RegisterBlock,
     module_name: str,
@@ -276,11 +280,18 @@ def read_input_block(
     )
     MODBUS_REQUESTS.labels(module=module_name, block=block.name).inc()
     try:
-        response = client.read_input_registers(
-            block.address,
-            count=block.count,
-            device_id=module.unit_id,
-        )
+        if module.function_code == 3:
+            response = client.read_holding_registers(
+                block.address,
+                count=block.count,
+                device_id=module.unit_id,
+            )
+        else:
+            response = client.read_input_registers(
+                block.address,
+                count=block.count,
+                device_id=module.unit_id,
+            )
         if not hasattr(response, "isError") or response.isError():
             raise RuntimeError(
                 f"Modbus exception reading {block.name} "
@@ -343,7 +354,7 @@ def collect_target(
                     raise
                 for block in module.blocks:
                     try:
-                        block_data[block.name] = read_input_block(
+                        block_data[block.name] = read_register_block(
                             client,
                             block,
                             module_name,

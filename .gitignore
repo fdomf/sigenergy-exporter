@@ -39,3 +39,4 @@ Desktop.ini
 # Local logs and generated validation output
 *.log
 metrics.txt
+*.metrics

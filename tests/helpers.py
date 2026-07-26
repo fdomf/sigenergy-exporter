@@ -97,6 +97,7 @@ class FakeClient:
         self.connect_result = connect
         self.on_read = on_read
         self.calls: list[tuple[int, int, int]] = []
+        self.function_calls: list[tuple[int, int, int, int]] = []
         self.closed = False
 
     def connect(self) -> bool:
@@ -113,6 +114,20 @@ class FakeClient:
         device_id: int,
     ) -> FakeResponse:
         self.calls.append((address, count, device_id))
+        self.function_calls.append((4, address, count, device_id))
+        if self.on_read is not None:
+            self.on_read(address)
+        return self.responses.get(address, FakeResponse([0] * count))
+
+    def read_holding_registers(
+        self,
+        address: int,
+        *,
+        count: int,
+        device_id: int,
+    ) -> FakeResponse:
+        self.calls.append((address, count, device_id))
+        self.function_calls.append((3, address, count, device_id))
         if self.on_read is not None:
             self.on_read(address)
         return self.responses.get(address, FakeResponse([0] * count))

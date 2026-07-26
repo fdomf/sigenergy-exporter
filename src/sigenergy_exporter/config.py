@@ -78,6 +78,7 @@ class MetricSpec:
 @dataclass(frozen=True)
 class ModuleConfig:
     unit_id: int
+    function_code: Literal[3, 4]
     timeout_seconds: float
     request_gap_seconds: float
     blocks: tuple[RegisterBlock, ...]
@@ -192,9 +193,14 @@ def _parse_module(module_name: str, document: object) -> ModuleConfig:
         document,
         {"unit_id", "timeout_seconds", "request_gap_seconds", "blocks", "metrics"},
         context,
+        optional={"function_code"},
     )
 
     unit_id = _require_int(document["unit_id"], f"{context}.unit_id")
+    function_code = _require_int(
+        document.get("function_code", 4),
+        f"{context}.function_code",
+    )
     timeout_seconds = _require_float(
         document["timeout_seconds"], f"{context}.timeout_seconds"
     )
@@ -203,6 +209,8 @@ def _parse_module(module_name: str, document: object) -> ModuleConfig:
     )
     if not 1 <= unit_id <= 247:
         raise ValueError(f"{context}.unit_id must be between 1 and 247")
+    if function_code not in (3, 4):
+        raise ValueError(f"{context}.function_code must be 3 or 4")
     if timeout_seconds <= 0:
         raise ValueError(f"{context}.timeout_seconds must be greater than 0")
     if request_gap_seconds < 1:
@@ -362,6 +370,7 @@ def _parse_module(module_name: str, document: object) -> ModuleConfig:
 
     return ModuleConfig(
         unit_id=unit_id,
+        function_code=function_code,  # type: ignore[arg-type]
         timeout_seconds=timeout_seconds,
         request_gap_seconds=request_gap_seconds,
         blocks=tuple(blocks),

@@ -24,8 +24,13 @@ jobs:
       - run: ruff format --check src tests
       - run: python -m unittest discover -v tests
       - run: sigenergy-exporter --config.file=sigenergy.yml --dry-run
-      - run: python -m tests.render_metrics > metrics.txt
-      - run: docker run --rm -i --entrypoint /bin/promtool prom/prometheus:v3.5.0 check metrics < metrics.txt
+      - name: Validate every bundled module with promtool
+        run: |
+          for module in sigenstor_plant_v2_5 sigenstor_inverter_v2_5; do
+            python -m tests.render_metrics --module "$module" > "$module.metrics"
+            docker run --rm -i --entrypoint /bin/promtool \
+              prom/prometheus:v3.5.0 check metrics < "$module.metrics"
+          done
 
   container:
     runs-on: ubuntu-latest

@@ -4,6 +4,7 @@ default_module: sigenstor_plant_v2_5
 modules:
   sigenstor_plant_v2_5:
     unit_id: 247
+    function_code: 4
     timeout_seconds: 3
     request_gap_seconds: 1.0
 
@@ -340,4 +341,511 @@ modules:
         offset: 4
         register_type: u16
         multiplier: 0.001
+        labels: {}
+
+  sigenstor_inverter_v2_5:
+    unit_id: 1
+    function_code: 3
+    timeout_seconds: 3
+    request_gap_seconds: 1.0
+
+    blocks:
+      - name: inverter
+        address: 30540
+        count: 84
+        required: true
+      - name: electrical
+        address: 31000
+        count: 42
+        required: true
+
+    metrics:
+      - name: sigenergy_inverter_rated_active_power_watts
+        help: Rated active power in watts from Sigenergy inverter register 30540.
+        block: inverter
+        offset: 0
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_max_apparent_power_volt_amperes
+        help: Maximum apparent power in volt-amperes from Sigenergy inverter register 30542.
+        block: inverter
+        offset: 2
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_max_active_power_watts
+        help: Maximum active power fed to the AC terminal in watts from Sigenergy inverter register 30544.
+        block: inverter
+        offset: 4
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_max_absorbed_active_power_watts
+        help: Maximum active power absorbed from the AC terminal in watts from Sigenergy inverter register 30546.
+        block: inverter
+        offset: 6
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_rated_battery_energy_joules
+        help: Rated battery energy capacity in joules from Sigenergy inverter register 30548.
+        block: inverter
+        offset: 8
+        register_type: u32
+        multiplier: 36000
+        labels: {}
+
+      - name: sigenergy_inverter_rated_battery_charge_power_watts
+        help: Rated battery charging power in watts from Sigenergy inverter register 30550.
+        block: inverter
+        offset: 10
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_rated_battery_discharge_power_watts
+        help: Rated battery discharging power in watts from Sigenergy inverter register 30552.
+        block: inverter
+        offset: 12
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_daily_battery_charge_energy_joules
+        help: Battery charging energy for the current day in joules from Sigenergy inverter register 30566.
+        block: inverter
+        offset: 26
+        register_type: u32
+        multiplier: 36000
+        labels: {}
+
+      - name: sigenergy_inverter_battery_charge_energy_joules
+        help: Accumulated battery charging energy in joules from Sigenergy inverter register 30568.
+        block: inverter
+        offset: 28
+        register_type: u64
+        multiplier: 36000
+        labels: {}
+
+      - name: sigenergy_inverter_daily_battery_discharge_energy_joules
+        help: Battery discharging energy for the current day in joules from Sigenergy inverter register 30572.
+        block: inverter
+        offset: 32
+        register_type: u32
+        multiplier: 36000
+        labels: {}
+
+      - name: sigenergy_inverter_battery_discharge_energy_joules
+        help: Accumulated battery discharging energy in joules from Sigenergy inverter register 30574.
+        block: inverter
+        offset: 34
+        register_type: u64
+        multiplier: 36000
+        labels: {}
+
+      - name: sigenergy_inverter_state
+        help: Inverter operating state as a one-hot state set from Sigenergy inverter register 30578.
+        block: inverter
+        offset: 38
+        register_type: u16
+        multiplier: 1
+        labels: {}
+        states:
+          label: state
+          values:
+            0: standby
+            1: running
+            2: fault
+            3: shutdown
+
+      - name: sigenergy_inverter_available_max_active_power_watts
+        help: Available maximum active power fed to the AC terminal in watts from Sigenergy inverter register 30579.
+        block: inverter
+        offset: 39
+        register_type: s32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_available_min_active_power_watts
+        help: Available minimum active power absorbed from the AC terminal in watts from Sigenergy inverter register 30581.
+        block: inverter
+        offset: 41
+        register_type: s32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_available_max_reactive_power_vars
+        help: Available maximum reactive power fed to the AC terminal in vars from Sigenergy inverter register 30583.
+        block: inverter
+        offset: 43
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_available_min_reactive_power_vars
+        help: Available minimum reactive power absorbed from the AC terminal in vars from Sigenergy inverter register 30585.
+        block: inverter
+        offset: 45
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_active_power_watts
+        help: Inverter active power in watts from Sigenergy inverter register 30587.
+        block: inverter
+        offset: 47
+        register_type: s32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_reactive_power_vars
+        help: Inverter reactive power in vars from Sigenergy inverter register 30589.
+        block: inverter
+        offset: 49
+        register_type: s32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_battery_available_max_charge_power_watts
+        help: Available maximum battery charging power in watts from Sigenergy inverter register 30591.
+        block: inverter
+        offset: 51
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_battery_available_max_discharge_power_watts
+        help: Available maximum battery discharging power in watts from Sigenergy inverter register 30593.
+        block: inverter
+        offset: 53
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_battery_available_charge_energy_joules
+        help: Available maximum battery charging energy in joules from Sigenergy inverter register 30595.
+        block: inverter
+        offset: 55
+        register_type: u32
+        multiplier: 36000
+        labels: {}
+
+      - name: sigenergy_inverter_battery_available_discharge_energy_joules
+        help: Available maximum battery discharging energy in joules from Sigenergy inverter register 30597.
+        block: inverter
+        offset: 57
+        register_type: u32
+        multiplier: 36000
+        labels: {}
+
+      - name: sigenergy_inverter_battery_power_watts
+        help: Battery charge or discharge power in watts from Sigenergy inverter register 30599; sign follows the device protocol.
+        block: inverter
+        offset: 59
+        register_type: s32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_battery_state_of_charge_ratio
+        help: Battery state of charge as a ratio from 0 to 1, from Sigenergy inverter register 30601.
+        block: inverter
+        offset: 61
+        register_type: u16
+        multiplier: 0.001
+        labels: {}
+
+      - name: sigenergy_inverter_battery_state_of_health_ratio
+        help: Battery state of health as a ratio from 0 to 1, from Sigenergy inverter register 30602.
+        block: inverter
+        offset: 62
+        register_type: u16
+        multiplier: 0.001
+        labels: {}
+
+      - name: sigenergy_inverter_battery_average_cell_temperature_celsius
+        help: Average battery cell temperature in degrees Celsius from Sigenergy inverter register 30603.
+        block: inverter
+        offset: 63
+        register_type: s16
+        multiplier: 0.1
+        labels: {}
+
+      - name: sigenergy_inverter_battery_average_cell_voltage_volts
+        help: Average battery cell voltage in volts from Sigenergy inverter register 30604.
+        block: inverter
+        offset: 64
+        register_type: u16
+        multiplier: 0.001
+        labels: {}
+
+      - name: sigenergy_inverter_battery_max_temperature_celsius
+        help: Maximum battery cluster temperature in degrees Celsius from Sigenergy inverter register 30620.
+        block: inverter
+        offset: 80
+        register_type: s16
+        multiplier: 0.1
+        labels: {}
+
+      - name: sigenergy_inverter_battery_min_temperature_celsius
+        help: Minimum battery cluster temperature in degrees Celsius from Sigenergy inverter register 30621.
+        block: inverter
+        offset: 81
+        register_type: s16
+        multiplier: 0.1
+        labels: {}
+
+      - name: sigenergy_inverter_battery_max_cell_voltage_volts
+        help: Maximum battery cluster cell voltage in volts from Sigenergy inverter register 30622.
+        block: inverter
+        offset: 82
+        register_type: u16
+        multiplier: 0.001
+        labels: {}
+
+      - name: sigenergy_inverter_battery_min_cell_voltage_volts
+        help: Minimum battery cluster cell voltage in volts from Sigenergy inverter register 30623.
+        block: inverter
+        offset: 83
+        register_type: u16
+        multiplier: 0.001
+        labels: {}
+
+      - name: sigenergy_inverter_rated_grid_voltage_volts
+        help: Rated grid voltage in volts from Sigenergy inverter register 31000.
+        block: electrical
+        offset: 0
+        register_type: u16
+        multiplier: 0.1
+        labels: {}
+
+      - name: sigenergy_inverter_rated_grid_frequency_hertz
+        help: Rated grid frequency in hertz from Sigenergy inverter register 31001.
+        block: electrical
+        offset: 1
+        register_type: u16
+        multiplier: 0.01
+        labels: {}
+
+      - name: sigenergy_inverter_grid_frequency_hertz
+        help: Grid frequency in hertz from Sigenergy inverter register 31002.
+        block: electrical
+        offset: 2
+        register_type: u16
+        multiplier: 0.01
+        labels: {}
+
+      - name: sigenergy_inverter_internal_temperature_celsius
+        help: Internal inverter temperature in degrees Celsius from Sigenergy inverter register 31003.
+        block: electrical
+        offset: 3
+        register_type: s16
+        multiplier: 0.1
+        labels: {}
+
+      - name: sigenergy_inverter_output_type
+        help: Inverter output type as a one-hot state set from Sigenergy inverter register 31004.
+        block: electrical
+        offset: 4
+        register_type: u16
+        multiplier: 1
+        labels: {}
+        states:
+          label: output
+          values:
+            0: line_neutral
+            1: three_phase_three_wire
+            2: three_phase_four_wire
+            3: split_phase
+
+      - name: sigenergy_inverter_line_voltage_volts
+        help: Inverter line voltage in volts from Sigenergy inverter registers 31005, 31007, and 31009.
+        block: electrical
+        offset: 5
+        register_type: u32
+        multiplier: 0.01
+        labels: {line: a_b}
+      - name: sigenergy_inverter_line_voltage_volts
+        help: Inverter line voltage in volts from Sigenergy inverter registers 31005, 31007, and 31009.
+        block: electrical
+        offset: 7
+        register_type: u32
+        multiplier: 0.01
+        labels: {line: b_c}
+      - name: sigenergy_inverter_line_voltage_volts
+        help: Inverter line voltage in volts from Sigenergy inverter registers 31005, 31007, and 31009.
+        block: electrical
+        offset: 9
+        register_type: u32
+        multiplier: 0.01
+        labels: {line: c_a}
+
+      - name: sigenergy_inverter_phase_voltage_volts
+        help: Inverter phase voltage in volts from Sigenergy inverter registers 31011, 31013, and 31015.
+        block: electrical
+        offset: 11
+        register_type: u32
+        multiplier: 0.01
+        labels: {phase: a}
+      - name: sigenergy_inverter_phase_voltage_volts
+        help: Inverter phase voltage in volts from Sigenergy inverter registers 31011, 31013, and 31015.
+        block: electrical
+        offset: 13
+        register_type: u32
+        multiplier: 0.01
+        labels: {phase: b}
+      - name: sigenergy_inverter_phase_voltage_volts
+        help: Inverter phase voltage in volts from Sigenergy inverter registers 31011, 31013, and 31015.
+        block: electrical
+        offset: 15
+        register_type: u32
+        multiplier: 0.01
+        labels: {phase: c}
+
+      - name: sigenergy_inverter_phase_current_amperes
+        help: Inverter phase current in amperes from Sigenergy inverter registers 31017, 31019, and 31021.
+        block: electrical
+        offset: 17
+        register_type: s32
+        multiplier: 0.01
+        labels: {phase: a}
+      - name: sigenergy_inverter_phase_current_amperes
+        help: Inverter phase current in amperes from Sigenergy inverter registers 31017, 31019, and 31021.
+        block: electrical
+        offset: 19
+        register_type: s32
+        multiplier: 0.01
+        labels: {phase: b}
+      - name: sigenergy_inverter_phase_current_amperes
+        help: Inverter phase current in amperes from Sigenergy inverter registers 31017, 31019, and 31021.
+        block: electrical
+        offset: 21
+        register_type: s32
+        multiplier: 0.01
+        labels: {phase: c}
+
+      - name: sigenergy_inverter_power_factor_ratio
+        help: Inverter power factor as a ratio from Sigenergy inverter register 31023.
+        block: electrical
+        offset: 23
+        register_type: u16
+        multiplier: 0.001
+        labels: {}
+
+      - name: sigenergy_inverter_battery_packs
+        help: Number of battery packs connected to the inverter from Sigenergy inverter register 31024.
+        block: electrical
+        offset: 24
+        register_type: u16
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_pv_strings
+        help: Number of photovoltaic strings connected to the inverter from Sigenergy inverter register 31025.
+        block: electrical
+        offset: 25
+        register_type: u16
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_mppts
+        help: Number of maximum power point trackers in the inverter from Sigenergy inverter register 31026.
+        block: electrical
+        offset: 26
+        register_type: u16
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027, 31029, 31031, and 31033.
+        block: electrical
+        offset: 27
+        register_type: s16
+        multiplier: 0.1
+        labels: {string: "1"}
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027, 31029, 31031, and 31033.
+        block: electrical
+        offset: 29
+        register_type: s16
+        multiplier: 0.1
+        labels: {string: "2"}
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027, 31029, 31031, and 31033.
+        block: electrical
+        offset: 31
+        register_type: s16
+        multiplier: 0.1
+        labels: {string: "3"}
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027, 31029, 31031, and 31033.
+        block: electrical
+        offset: 33
+        register_type: s16
+        multiplier: 0.1
+        labels: {string: "4"}
+
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31028, 31030, 31032, and 31034.
+        block: electrical
+        offset: 28
+        register_type: s16
+        multiplier: 0.01
+        labels: {string: "1"}
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31028, 31030, 31032, and 31034.
+        block: electrical
+        offset: 30
+        register_type: s16
+        multiplier: 0.01
+        labels: {string: "2"}
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31028, 31030, 31032, and 31034.
+        block: electrical
+        offset: 32
+        register_type: s16
+        multiplier: 0.01
+        labels: {string: "3"}
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31028, 31030, 31032, and 31034.
+        block: electrical
+        offset: 34
+        register_type: s16
+        multiplier: 0.01
+        labels: {string: "4"}
+
+      - name: sigenergy_inverter_pv_power_watts
+        help: Total photovoltaic input power in watts from Sigenergy inverter register 31035.
+        block: electrical
+        offset: 35
+        register_type: s32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_insulation_resistance_ohms
+        help: Photovoltaic insulation resistance in ohms from Sigenergy inverter register 31037.
+        block: electrical
+        offset: 37
+        register_type: u16
+        multiplier: 1000
+        labels: {}
+
+      - name: sigenergy_inverter_startup_timestamp_seconds
+        help: Unix timestamp of inverter startup in seconds from Sigenergy inverter register 31038.
+        block: electrical
+        offset: 38
+        register_type: u32
+        multiplier: 1
+        labels: {}
+
+      - name: sigenergy_inverter_shutdown_timestamp_seconds
+        help: Unix timestamp of inverter shutdown in seconds from Sigenergy inverter register 31040.
+        block: electrical
+        offset: 40
+        register_type: u32
+        multiplier: 1
         labels: {}

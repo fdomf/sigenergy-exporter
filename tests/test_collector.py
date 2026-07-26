@@ -183,6 +183,10 @@ class CollectionTests(unittest.TestCase):
             factory.clients[0].calls,
             [(30000, 4, 247), (30010, 1, 247)],
         )
+        self.assertEqual(
+            factory.clients[0].function_calls,
+            [(4, 30000, 4, 247), (4, 30010, 1, 247)],
+        )
         self.assertEqual(self.clock.sleeps, [1.0])
         self.assertTrue(factory.clients[0].closed)
         self.assertEqual(
@@ -401,6 +405,122 @@ class CollectionTests(unittest.TestCase):
         self.assertIn('sigenergy_ems_mode{mode="ai_mode"} 0.0', output)
         self.assertIn('sigenergy_grid_mode{mode="on_grid"} 1.0', output)
         self.assertIn('sigenergy_plant_state{state="standby"} 1.0', output)
+
+    def test_inverter_module_uses_fc03_and_normalizes_v25_values(self) -> None:
+        module = load_exporter_config(REPOSITORY_CONFIG).modules[
+            "sigenstor_inverter_v2_5"
+        ]
+        inverter = [0] * 84
+        electrical = [0] * 42
+
+        def set_u32(registers: list[int], offset: int, value: int) -> None:
+            registers[offset] = (value >> 16) & 0xFFFF
+            registers[offset + 1] = value & 0xFFFF
+
+        def set_s32(registers: list[int], offset: int, value: int) -> None:
+            set_u32(registers, offset, value & 0xFFFFFFFF)
+
+        def set_u64(registers: list[int], offset: int, value: int) -> None:
+            registers[offset : offset + 4] = [
+                (value >> 48) & 0xFFFF,
+                (value >> 32) & 0xFFFF,
+                (value >> 16) & 0xFFFF,
+                value & 0xFFFF,
+            ]
+
+        set_u32(inverter, 0, 5000)
+        set_u64(inverter, 28, 123)
+        inverter[38] = 1
+        set_s32(inverter, 59, -750)
+        inverter[61] = 734
+        inverter[63] = (-55) & 0xFFFF
+        inverter[64] = 3333
+        inverter[80] = 425
+        inverter[81] = 125
+        electrical[2] = 5001
+        electrical[4] = 2
+        set_u32(electrical, 5, 40012)
+        set_s32(electrical, 17, -1234)
+        electrical[23] = 987
+        electrical[24:27] = [6, 4, 2]
+        electrical[27] = 4001
+        electrical[28] = 1234
+        set_s32(electrical, 35, 4200)
+        electrical[37] = 250
+        set_u32(electrical, 38, 1_700_000_000)
+
+        factory = ClientFactory(
+            {
+                30540: FakeResponse(inverter),
+                31000: FakeResponse(electrical),
+            }
+        )
+        registry = CollectorRegistry()
+        registry.register(
+            SigenergyCollector(
+                self.target,
+                "sigenstor_inverter_v2_5",
+                module,
+                self.coordinator,
+                client_factory=factory,
+                monotonic=self.clock.monotonic,
+            )
+        )
+        output = generate_latest(registry).decode()
+
+        self.assertEqual(
+            factory.clients[0].function_calls,
+            [(3, 30540, 84, 1), (3, 31000, 42, 1)],
+        )
+        self.assertIn("sigenergy_inverter_rated_active_power_watts 5000.0", output)
+        self.assertIn(
+            "sigenergy_inverter_battery_charge_energy_joules 4.428e+06",
+            output,
+        )
+        self.assertIn("sigenergy_inverter_battery_power_watts -750.0", output)
+        self.assertIn(
+            "sigenergy_inverter_battery_state_of_charge_ratio 0.734",
+            output,
+        )
+        self.assertIn(
+            "sigenergy_inverter_battery_average_cell_temperature_celsius -5.5",
+            output,
+        )
+        self.assertIn(
+            "sigenergy_inverter_battery_average_cell_voltage_volts 3.333",
+            output,
+        )
+        self.assertIn("sigenergy_inverter_grid_frequency_hertz 50.01", output)
+        self.assertIn(
+            'sigenergy_inverter_line_voltage_volts{line="a_b"} 400.12',
+            output,
+        )
+        self.assertIn(
+            'sigenergy_inverter_phase_current_amperes{phase="a"} -12.34',
+            output,
+        )
+        self.assertIn("sigenergy_inverter_power_factor_ratio 0.987", output)
+        self.assertIn(
+            'sigenergy_inverter_pv_string_voltage_volts{string="1"} 400.1',
+            output,
+        )
+        self.assertIn(
+            'sigenergy_inverter_pv_string_current_amperes{string="1"} 12.34',
+            output,
+        )
+        self.assertIn(
+            "sigenergy_inverter_insulation_resistance_ohms 250000.0",
+            output,
+        )
+        self.assertIn(
+            "sigenergy_inverter_startup_timestamp_seconds 1.7e+09",
+            output,
+        )
+        self.assertIn('sigenergy_inverter_state{state="running"} 1.0', output)
+        self.assertIn(
+            'sigenergy_inverter_output_type{output="three_phase_four_wire"} 1.0',
+            output,
+        )
 
 
 if __name__ == "__main__":

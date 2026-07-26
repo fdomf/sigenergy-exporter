@@ -1,12 +1,14 @@
 # Sigenergy Prometheus exporter
 
-A multi-target Prometheus exporter for Sigenergy plants over
-Modbus TCP. Prometheus supplies the plant address at scrape time and the
+A multi-target Prometheus exporter for Sigenergy plants and inverters over
+Modbus TCP. Prometheus supplies the target address at scrape time and the
 exporter synchronously reads the selected protocol module.
 
 The bundled `sigenstor_plant_v2_5` module covers plant and ESS running information
 from Sigenergy Modbus Protocol V2.5 (2025-02-19), using plant unit ID `247`.
-It never calls a Modbus write function.
+The bundled `sigenstor_inverter_v2_5` module covers hybrid-inverter, battery,
+grid, and PV-string running information using inverter unit ID `1`. Neither
+module calls a Modbus write function.
 
 ## Run
 
@@ -21,7 +23,7 @@ python -m venv .venv
 Run the published non-root container:
 
 ```console
-docker run --rm -p 10047:10047 ghcr.io/fdomf/sigenergy-exporter:0.1.1
+docker run --rm -p 10047:10047 ghcr.io/fdomf/sigenergy-exporter:0.2.0
 ```
 
 Or build it locally:
@@ -37,7 +39,7 @@ repository:
 ```yaml
 services:
   sigenergy-exporter:
-    image: ghcr.io/fdomf/sigenergy-exporter:0.1.1
+    image: ghcr.io/fdomf/sigenergy-exporter:0.2.0
     restart: unless-stopped
     ports:
       - "10047:10047"
@@ -80,6 +82,23 @@ scrape_configs:
       - target_label: __address__
         replacement: sigenergy-exporter:10047
 
+  - job_name: sigenergy-inverter
+    scrape_interval: 15s
+    scrape_timeout: 14s
+    metrics_path: /sigenergy
+    params:
+      module: [sigenstor_inverter_v2_5]
+    static_configs:
+      - targets:
+          - 192.0.2.10
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: sigenergy-exporter:10047
+
   - job_name: sigenergy-exporter
     static_configs:
       - targets: [sigenergy-exporter:10047]
@@ -110,6 +129,7 @@ Target metrics use Prometheus base-unit conventions:
 - state of charge and health are ratios from `0` to `1`;
 - energy and capacity use joules;
 - active power uses watts and reactive power uses vars;
+- electrical measurements use volts, amperes, hertz, and ohms;
 - phase measurements use the bounded `phase="a|b|c"` label;
 - operating modes and plant state are one-hot gauge families with a bounded
   `mode` or `state` label, including an `unknown` value for undocumented codes.
@@ -122,20 +142,28 @@ scrape deadline exhaustion. Deadline stages use the bounded values `queue`,
 ## Configuration
 
 `sigenergy.yml` contains reusable protocol modules, not targets. Each module
-defines its Modbus unit, timeout, minimum request period, read blocks, and
-metric decoding. The exporter strictly validates names, types, block bounds,
-scales, state mappings, static label schemas, and duplicate samples before
-accepting a file.
+defines its Modbus unit, read-only function code, timeout, minimum request
+period, read blocks, and metric decoding. Function codes `3` and `4` are
+supported; no write function code is accepted. The exporter strictly validates
+names, types, block bounds, scales, state mappings, static label schemas, and
+duplicate samples before accepting a file.
 A failed reload leaves the last valid configuration active.
 
 Supported register types are `u16`, `s16`, `u32`, `s32`, `u64`, and `s64`.
-Multi-register values are decoded high-word first. The bundled module reads:
+Multi-register values are decoded high-word first. The bundled plant module
+reads:
 
 - required block `30003-30072`;
 - optional ESS detail block `30083-30087`.
 
-Opaque alarm bitfields and reserved registers are deliberately not exported.
-Per-inverter and AC/DC charger unit IDs are outside the v1 scope.
+The bundled inverter module reads required blocks `30540-30623` and
+`31000-31041`. It defaults to inverter unit ID `1`; installations that assign a
+different inverter address from `1` through `246` should mount a copy of
+`sigenergy.yml` with the module's `unit_id` changed.
+
+Opaque alarm bitfields, reserved registers, and identity strings are
+deliberately not exported. AC/DC charger modules remain outside the current
+scope.
 
 Reload after editing the mounted file:
 
@@ -163,9 +191,13 @@ The bundled profile implements Sigenergy Modbus Protocol V2.5 dated
 | Profile | Modbus function | Unit ID | Register ranges | Automated validation |
 | --- | --- | ---: | --- | --- |
 | `sigenstor_plant_v2_5` | FC04 input registers | 247 | `30003-30072`, `30083-30087` | Decoding, scaling, pacing, failures, exposition |
+| `sigenstor_inverter_v2_5` | FC03 read-only registers | 1 (configurable) | `30540-30623`, `31000-31041` | Function code, unit ID, decoding, scaling, states, pacing, exposition |
 
 No specific SigenStor model and firmware combination is claimed as publicly
 validated yet.
+
+Published container tags are multi-platform images for `linux/amd64` and
+`linux/arm64`.
 
 ## Development
 

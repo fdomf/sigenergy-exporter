@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import sys
 
 from prometheus_client import CollectorRegistry
@@ -23,8 +24,14 @@ def sleep(seconds: float) -> None:
     now += seconds
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--module")
+args = parser.parse_args()
+
 config = load_exporter_config(REPOSITORY_CONFIG)
-module_name = config.default_module
+module_name = args.module or config.default_module
+if module_name not in config.modules:
+    parser.error(f"unknown module: {module_name}")
 registry = CollectorRegistry()
 registry.register(
     SigenergyCollector(
