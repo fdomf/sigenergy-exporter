@@ -194,8 +194,7 @@ The bundled profile implements Sigenergy Modbus Protocol V2.5 dated
 | `sigenstor_plant_v2_5` | FC04 input registers | 247 | `30003-30072`, `30083-30087` | Decoding, scaling, pacing, failures, exposition |
 | `sigenstor_inverter_v2_5` | FC03 read-only registers | 1 (configurable) | `30540-30623`, `31000-31065` | Function code, unit ID, decoding, scaling, invalid sentinels, states, pacing, exposition |
 
-No specific SigenStor model and firmware combination is claimed as publicly
-validated yet.
+The plant and inverter profiles have been validated against a Sigenergy hybrid inverter with SigenStack battery system.
 
 Published container tags are multi-platform images for `linux/amd64` and
 `linux/arm64`.
