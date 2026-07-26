@@ -60,7 +60,7 @@ class RepositoryConfigTests(unittest.TestCase):
             ],
             [
                 ("inverter", 30540, 84, True),
-                ("electrical", 31000, 42, True),
+                ("electrical", 31000, 66, True),
             ],
         )
         names = {metric.name for metric in module.metrics}
@@ -71,6 +71,16 @@ class RepositoryConfigTests(unittest.TestCase):
         self.assertFalse(any("30282" in metric.help for metric in module.metrics))
         metrics = {metric.name: metric for metric in module.metrics}
         self.assertEqual(metrics["sigenergy_inverter_state"].states.label, "state")
+        pv_voltages = [
+            metric
+            for metric in module.metrics
+            if metric.name == "sigenergy_inverter_pv_string_voltage_volts"
+        ]
+        self.assertEqual(
+            [dict(metric.labels)["string"] for metric in pv_voltages],
+            [str(value) for value in range(1, 17)],
+        )
+        self.assertTrue(all(metric.invalid_values == (-1,) for metric in pv_voltages))
         self.assertEqual(
             metrics["sigenergy_inverter_output_type"].states.values,
             (
@@ -97,6 +107,24 @@ class ValidationTests(unittest.TestCase):
         document = copied_document()
         document["modules"]["test_module"]["function_code"] = 6
         with self.assertRaisesRegex(ValueError, "must be 3 or 4"):
+            parse_config_document(document)
+
+    def test_validates_invalid_register_values(self) -> None:
+        document = copied_document()
+        metric = document["modules"]["test_module"]["metrics"][2]
+        metric["invalid_values"] = [65535]
+        config = parse_config_document(document)
+        self.assertEqual(
+            config.modules["test_module"].metrics[2].invalid_values,
+            (65535,),
+        )
+
+        metric["invalid_values"] = [-1]
+        with self.assertRaisesRegex(ValueError, "outside the range"):
+            parse_config_document(document)
+
+        metric["invalid_values"] = [65535, 65535]
+        with self.assertRaisesRegex(ValueError, "duplicate"):
             parse_config_document(document)
 
     def test_default_module_must_exist(self) -> None:

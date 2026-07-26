@@ -356,7 +356,7 @@ modules:
         required: true
       - name: electrical
         address: 31000
-        count: 42
+        count: 66
         required: true
 
     metrics:
@@ -732,7 +732,7 @@ modules:
         help: Inverter power factor as a ratio from Sigenergy inverter register 31023.
         block: electrical
         offset: 23
-        register_type: u16
+        register_type: s16
         multiplier: 0.001
         labels: {}
 
@@ -761,62 +761,264 @@ modules:
         labels: {}
 
       - name: sigenergy_inverter_pv_string_voltage_volts
-        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027, 31029, 31031, and 31033.
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
         block: electrical
         offset: 27
         register_type: s16
         multiplier: 0.1
+        invalid_values: [-1]
         labels: {string: "1"}
       - name: sigenergy_inverter_pv_string_voltage_volts
-        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027, 31029, 31031, and 31033.
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
         block: electrical
         offset: 29
         register_type: s16
         multiplier: 0.1
+        invalid_values: [-1]
         labels: {string: "2"}
       - name: sigenergy_inverter_pv_string_voltage_volts
-        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027, 31029, 31031, and 31033.
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
         block: electrical
         offset: 31
         register_type: s16
         multiplier: 0.1
+        invalid_values: [-1]
         labels: {string: "3"}
       - name: sigenergy_inverter_pv_string_voltage_volts
-        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027, 31029, 31031, and 31033.
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
         block: electrical
         offset: 33
         register_type: s16
         multiplier: 0.1
+        invalid_values: [-1]
         labels: {string: "4"}
 
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 42
+        register_type: s16
+        multiplier: 0.1
+        invalid_values: [-1]
+        labels: {string: "5"}
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 44
+        register_type: s16
+        multiplier: 0.1
+        invalid_values: [-1]
+        labels: {string: "6"}
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 46
+        register_type: s16
+        multiplier: 0.1
+        invalid_values: [-1]
+        labels: {string: "7"}
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 48
+        register_type: s16
+        multiplier: 0.1
+        invalid_values: [-1]
+        labels: {string: "8"}
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 50
+        register_type: s16
+        multiplier: 0.1
+        invalid_values: [-1]
+        labels: {string: "9"}
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 52
+        register_type: s16
+        multiplier: 0.1
+        invalid_values: [-1]
+        labels: {string: "10"}
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 54
+        register_type: s16
+        multiplier: 0.1
+        invalid_values: [-1]
+        labels: {string: "11"}
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 56
+        register_type: s16
+        multiplier: 0.1
+        invalid_values: [-1]
+        labels: {string: "12"}
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 58
+        register_type: s16
+        multiplier: 0.1
+        invalid_values: [-1]
+        labels: {string: "13"}
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 60
+        register_type: s16
+        multiplier: 0.1
+        invalid_values: [-1]
+        labels: {string: "14"}
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 62
+        register_type: s16
+        multiplier: 0.1
+        invalid_values: [-1]
+        labels: {string: "15"}
+      - name: sigenergy_inverter_pv_string_voltage_volts
+        help: Photovoltaic string voltage in volts from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 64
+        register_type: s16
+        multiplier: 0.1
+        invalid_values: [-1]
+        labels: {string: "16"}
+
       - name: sigenergy_inverter_pv_string_current_amperes
-        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31028, 31030, 31032, and 31034.
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
         block: electrical
         offset: 28
         register_type: s16
         multiplier: 0.01
+        invalid_values: [-1]
         labels: {string: "1"}
       - name: sigenergy_inverter_pv_string_current_amperes
-        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31028, 31030, 31032, and 31034.
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
         block: electrical
         offset: 30
         register_type: s16
         multiplier: 0.01
+        invalid_values: [-1]
         labels: {string: "2"}
       - name: sigenergy_inverter_pv_string_current_amperes
-        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31028, 31030, 31032, and 31034.
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
         block: electrical
         offset: 32
         register_type: s16
         multiplier: 0.01
+        invalid_values: [-1]
         labels: {string: "3"}
       - name: sigenergy_inverter_pv_string_current_amperes
-        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31028, 31030, 31032, and 31034.
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
         block: electrical
         offset: 34
         register_type: s16
         multiplier: 0.01
+        invalid_values: [-1]
         labels: {string: "4"}
+
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 43
+        register_type: s16
+        multiplier: 0.01
+        invalid_values: [-1]
+        labels: {string: "5"}
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 45
+        register_type: s16
+        multiplier: 0.01
+        invalid_values: [-1]
+        labels: {string: "6"}
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 47
+        register_type: s16
+        multiplier: 0.01
+        invalid_values: [-1]
+        labels: {string: "7"}
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 49
+        register_type: s16
+        multiplier: 0.01
+        invalid_values: [-1]
+        labels: {string: "8"}
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 51
+        register_type: s16
+        multiplier: 0.01
+        invalid_values: [-1]
+        labels: {string: "9"}
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 53
+        register_type: s16
+        multiplier: 0.01
+        invalid_values: [-1]
+        labels: {string: "10"}
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 55
+        register_type: s16
+        multiplier: 0.01
+        invalid_values: [-1]
+        labels: {string: "11"}
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 57
+        register_type: s16
+        multiplier: 0.01
+        invalid_values: [-1]
+        labels: {string: "12"}
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 59
+        register_type: s16
+        multiplier: 0.01
+        invalid_values: [-1]
+        labels: {string: "13"}
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 61
+        register_type: s16
+        multiplier: 0.01
+        invalid_values: [-1]
+        labels: {string: "14"}
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 63
+        register_type: s16
+        multiplier: 0.01
+        invalid_values: [-1]
+        labels: {string: "15"}
+      - name: sigenergy_inverter_pv_string_current_amperes
+        help: Photovoltaic string current in amperes from Sigenergy inverter registers 31027-31034 and 31042-31065.
+        block: electrical
+        offset: 65
+        register_type: s16
+        multiplier: 0.01
+        invalid_values: [-1]
+        labels: {string: "16"}
 
       - name: sigenergy_inverter_pv_power_watts
         help: Total photovoltaic input power in watts from Sigenergy inverter register 31035.

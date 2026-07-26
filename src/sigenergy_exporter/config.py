@@ -63,6 +63,7 @@ class MetricSpec:
     offset: int
     register_type: RegisterType
     multiplier: float
+    invalid_values: tuple[int, ...]
     labels: tuple[tuple[str, str], ...]
     states: StateSpec | None
 
@@ -185,6 +186,36 @@ def _parse_states(
     return StateSpec(label=label, values=tuple(sorted(states)))
 
 
+def _parse_invalid_values(
+    value: object,
+    context: str,
+    register_type: RegisterType,
+) -> tuple[int, ...]:
+    if value is None:
+        return ()
+    if not isinstance(value, list) or not value:
+        raise ValueError(f"{context} must be a non-empty list")
+
+    width = TYPE_WIDTHS[register_type]
+    bits = width * 16
+    if register_type.startswith("u"):
+        minimum, maximum = 0, (1 << bits) - 1
+    else:
+        minimum, maximum = -(1 << (bits - 1)), (1 << (bits - 1)) - 1
+
+    invalid_values: list[int] = []
+    for index, raw_value in enumerate(value):
+        invalid_value = _require_int(raw_value, f"{context}[{index}]")
+        if not minimum <= invalid_value <= maximum:
+            raise ValueError(
+                f"{context}[{index}] is outside the range of {register_type}"
+            )
+        if invalid_value in invalid_values:
+            raise ValueError(f"{context} contains duplicate values")
+        invalid_values.append(invalid_value)
+    return tuple(sorted(invalid_values))
+
+
 def _parse_module(module_name: str, document: object) -> ModuleConfig:
     context = f"modules.{module_name}"
     if not isinstance(document, Mapping):
@@ -274,7 +305,7 @@ def _parse_module(module_name: str, document: object) -> ModuleConfig:
                 "labels",
             },
             metric_context,
-            optional={"states"},
+            optional={"invalid_values", "states"},
         )
         name = raw_metric["name"]
         help_text = raw_metric["help"]
@@ -308,6 +339,11 @@ def _parse_module(module_name: str, document: object) -> ModuleConfig:
         states = _parse_states(
             raw_metric.get("states"),
             f"{metric_context}.states",
+            register_type,  # type: ignore[arg-type]
+        )
+        invalid_values = _parse_invalid_values(
+            raw_metric.get("invalid_values"),
+            f"{metric_context}.invalid_values",
             register_type,  # type: ignore[arg-type]
         )
         if offset < 0:
@@ -356,6 +392,7 @@ def _parse_module(module_name: str, document: object) -> ModuleConfig:
                 offset=offset,
                 register_type=register_type,  # type: ignore[arg-type]
                 multiplier=multiplier,
+                invalid_values=invalid_values,
                 labels=labels,
                 states=states,
             )

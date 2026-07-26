@@ -498,6 +498,8 @@ class SigenergyCollector:
                 spec.offset,
                 spec.register_type,
             )
+            if decoded_value in spec.invalid_values:
+                continue
             family = families.get(spec.name)
             if family is None:
                 label_names = list(spec.label_names)

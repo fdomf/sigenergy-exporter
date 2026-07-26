@@ -411,7 +411,7 @@ class CollectionTests(unittest.TestCase):
             "sigenstor_inverter_v2_5"
         ]
         inverter = [0] * 84
-        electrical = [0] * 42
+        electrical = [0] * 66
 
         def set_u32(registers: list[int], offset: int, value: int) -> None:
             registers[offset] = (value >> 16) & 0xFFFF
@@ -441,10 +441,14 @@ class CollectionTests(unittest.TestCase):
         electrical[4] = 2
         set_u32(electrical, 5, 40012)
         set_s32(electrical, 17, -1234)
-        electrical[23] = 987
-        electrical[24:27] = [6, 4, 2]
+        electrical[23] = (-993) & 0xFFFF
+        electrical[24:27] = [18, 16, 8]
         electrical[27] = 4001
         electrical[28] = 1234
+        electrical[29] = 0xFFFF
+        electrical[30] = 0xFFFF
+        electrical[64] = 6501
+        electrical[65] = 234
         set_s32(electrical, 35, 4200)
         electrical[37] = 250
         set_u32(electrical, 38, 1_700_000_000)
@@ -470,7 +474,7 @@ class CollectionTests(unittest.TestCase):
 
         self.assertEqual(
             factory.clients[0].function_calls,
-            [(3, 30540, 84, 1), (3, 31000, 42, 1)],
+            [(3, 30540, 84, 1), (3, 31000, 66, 1)],
         )
         self.assertIn("sigenergy_inverter_rated_active_power_watts 5000.0", output)
         self.assertIn(
@@ -499,13 +503,29 @@ class CollectionTests(unittest.TestCase):
             'sigenergy_inverter_phase_current_amperes{phase="a"} -12.34',
             output,
         )
-        self.assertIn("sigenergy_inverter_power_factor_ratio 0.987", output)
+        self.assertIn("sigenergy_inverter_power_factor_ratio -0.993", output)
         self.assertIn(
             'sigenergy_inverter_pv_string_voltage_volts{string="1"} 400.1',
             output,
         )
         self.assertIn(
             'sigenergy_inverter_pv_string_current_amperes{string="1"} 12.34',
+            output,
+        )
+        self.assertNotIn(
+            'sigenergy_inverter_pv_string_voltage_volts{string="2"}',
+            output,
+        )
+        self.assertNotIn(
+            'sigenergy_inverter_pv_string_current_amperes{string="2"}',
+            output,
+        )
+        self.assertIn(
+            'sigenergy_inverter_pv_string_voltage_volts{string="16"} 650.1',
+            output,
+        )
+        self.assertIn(
+            'sigenergy_inverter_pv_string_current_amperes{string="16"} 2.34',
             output,
         )
         self.assertIn(

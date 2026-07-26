@@ -7,7 +7,7 @@ exporter synchronously reads the selected protocol module.
 The bundled `sigenstor_plant_v2_5` module covers plant and ESS running information
 from Sigenergy Modbus Protocol V2.5 (2025-02-19), using plant unit ID `247`.
 The bundled `sigenstor_inverter_v2_5` module covers hybrid-inverter, battery,
-grid, and PV-string running information using inverter unit ID `1`. Neither
+grid, and up to 16 PV-string measurements using inverter unit ID `1`. Neither
 module calls a Modbus write function.
 
 ## Run
@@ -157,13 +157,14 @@ reads:
 - optional ESS detail block `30083-30087`.
 
 The bundled inverter module reads required blocks `30540-30623` and
-`31000-31041`. It defaults to inverter unit ID `1`; installations that assign a
+`31000-31065`. It defaults to inverter unit ID `1`; installations that assign a
 different inverter address from `1` through `246` should mount a copy of
 `sigenergy.yml` with the module's `unit_id` changed.
 
 Opaque alarm bitfields, reserved registers, and identity strings are
-deliberately not exported. AC/DC charger modules remain outside the current
-scope.
+deliberately not exported. Metrics whose registers match a configured
+`invalid_values` sentinel are omitted. AC/DC charger modules remain outside the
+current scope.
 
 Reload after editing the mounted file:
 
@@ -191,7 +192,7 @@ The bundled profile implements Sigenergy Modbus Protocol V2.5 dated
 | Profile | Modbus function | Unit ID | Register ranges | Automated validation |
 | --- | --- | ---: | --- | --- |
 | `sigenstor_plant_v2_5` | FC04 input registers | 247 | `30003-30072`, `30083-30087` | Decoding, scaling, pacing, failures, exposition |
-| `sigenstor_inverter_v2_5` | FC03 read-only registers | 1 (configurable) | `30540-30623`, `31000-31041` | Function code, unit ID, decoding, scaling, states, pacing, exposition |
+| `sigenstor_inverter_v2_5` | FC03 read-only registers | 1 (configurable) | `30540-30623`, `31000-31065` | Function code, unit ID, decoding, scaling, invalid sentinels, states, pacing, exposition |
 
 No specific SigenStor model and firmware combination is claimed as publicly
 validated yet.
